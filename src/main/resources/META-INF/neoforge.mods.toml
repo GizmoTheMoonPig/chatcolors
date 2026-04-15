@@ -4,7 +4,7 @@ license = "LGPLv3"
 
 [[mods]]
 modId = "chatcolors"
-version = "4.0"
+version = "${file.jarVersion}"
 displayName = "Chat Colors"
 authors = "PORTB"
 description = "Overhauls the game's 15 year old (from 2009) text formatting syntax."
