@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "page.codeberg.portb.chatcolors.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "StringUtilMixin"
+  ],
+  "client": [
+    "client.TextProcessingMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

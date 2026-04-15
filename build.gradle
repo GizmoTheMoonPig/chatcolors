@@ -1,0 +1,116 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+
+plugins {
+	id 'java-library'
+	id 'eclipse'
+	id 'idea'
+	id 'maven-publish'
+	id 'net.neoforged.moddev' version "2.0.141"
+}
+
+def secrets = new Properties()
+def secretsFile = file('secrets.properties')
+if (secretsFile.exists()) {
+	secretsFile.withInputStream {
+		stream -> secrets.load(stream)
+	}
+
+	fileTree("secrets").matching {
+		include "**/*.properties"
+	}.each {
+		File file ->
+			file.withInputStream {
+				stream -> secrets.load(stream)
+			}
+	}
+}
+
+idea {
+	module {
+		downloadJavadoc = true
+		downloadSources = true
+	}
+}
+
+version = "${project.minecraft_version}-${project.mod_version}"
+group = "page.codeberg.portb.${project.modid}"
+
+base {
+	archivesName = mod_name
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+tasks.withType(JavaCompile).configureEach {
+	options.compilerArgs << "-Xlint:all,-classfile,-processing,-deprecation,-this-escape" << "-Werror"
+	options.encoding = 'UTF-8'
+}
+
+neoForge {
+	version = project.neo_version
+	validateAccessTransformers = true
+
+	runs {
+		configureEach {
+			logLevel = org.slf4j.event.Level.DEBUG
+		}
+
+		client {
+			client()
+			programArguments.addAll '--username', secrets.getProperty("username") ?: 'Dev', secrets.getProperty("uuid") ? '--uuid' : '', secrets.getProperty("uuid") ?: ''
+		}
+
+		server {
+			server()
+			programArgument '--nogui'
+		}
+
+		data {
+			data()
+			programArguments.addAll '--mod', modid, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+		}
+	}
+
+	mods {
+		"${modid}" {
+			sourceSet this.sourceSets.main
+		}
+	}
+}
+
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+repositories {
+}
+
+dependencies {
+	implementation "net.neoforged:neoforge:${project.neo_version}"
+
+	annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+}
+
+processResources {
+	def ver = project.version
+	filesMatching("META-INF/neoforge.mods.toml") {
+		expand([
+			'file': [
+				'jarVersion': ver
+			]
+		])
+	}
+}
+
+tasks.named('jar', Jar).configure {
+	manifest {
+		attributes([
+				'Specification-Title'     : modid,
+				'Specification-Vendor'    : "PORTB",
+				'Specification-Version'   : "1",
+				'Implementation-Title'    : project.name,
+				'Implementation-Version'  : project.jar.archiveVersion,
+				'Implementation-Vendor'   : "PORTB",
+				'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+		])
+	}
+}

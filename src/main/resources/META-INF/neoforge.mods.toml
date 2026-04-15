@@ -1,0 +1,27 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "LGPLv3"
+
+[[mods]]
+modId = "chatcolors"
+version = "4.0"
+displayName = "Chat Colors"
+authors = "PORTB"
+description = "Overhauls the game's 15 year old (from 2009) text formatting syntax."
+
+[[dependencies.chatcolors]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1.0,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.chatcolors]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1]"
+ordering = "NONE"
+side = "BOTH"
+
+[[mixins]]
+config="chatcolors.mixins.json"
